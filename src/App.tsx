@@ -1,7 +1,15 @@
-import React from 'react';
+import React from "react";
+
+const SignupForm = () => {
+  return <div>Sign up Form</div>;
+};
 
 function App() {
-  return <div className="App">Sign up Form (SOLID React)</div>;
+  return (
+    <div>
+      <SignupForm />
+    </div>
+  );
 }
 
 export default App;
