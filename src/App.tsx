@@ -4,7 +4,7 @@ const submitCredentials = (username: string, password: string) => {
   return new Promise((resolve): void => {
     setTimeout(() => {
       resolve(null);
-      console.log(username, password);
+      console.log("Submitted data: ", username, password);
     }, 500);
   });
 };
@@ -33,7 +33,15 @@ const SignupForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form
+      onSubmit={handleSubmit}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        border: "1px solid black",
+        padding: "5px",
+      }}
+    >
       <input
         type="text"
         name="username"
@@ -47,15 +55,23 @@ const SignupForm = () => {
         value={formData.password}
         placeholder="Enter password"
         onChange={handleChange}
+        style={{ marginTop: "5px" }}
       />
-      <input type="submit" value="Submit" disabled={formData.loading} />
+      <input
+        type="submit"
+        value="Submit"
+        disabled={formData.loading}
+        style={{ marginTop: "5px" }}
+      />
     </form>
   );
 };
 
 function App() {
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{ display: "flex", flexDirection: "column", maxWidth: "300px" }}
+    >
       <SignupForm />
     </div>
   );
