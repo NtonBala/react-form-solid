@@ -9,12 +9,39 @@ const submitCredentials = (username: string, password: string) => {
   });
 };
 
+type Errors = {
+  username?: string;
+  password?: string;
+};
+
 const SignupForm = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    username: string;
+    password: string;
+    errors: Errors;
+    loading: boolean;
+  }>({
     username: "",
     password: "",
+    errors: {},
     loading: false,
   });
+
+  const validateForm = () => {
+    const errors: Errors = {};
+
+    if (!formData.username) {
+      errors.username = "Username is required";
+    }
+
+    if (!formData.password) {
+      errors.password = "Password is required";
+    }
+
+    setFormData((prevState) => ({ ...prevState, errors }));
+
+    return Object.keys(errors).length === 0;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -24,6 +51,8 @@ const SignupForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
 
     setFormData((prevState) => ({ ...prevState, loading: true }));
 
@@ -49,6 +78,12 @@ const SignupForm = () => {
         placeholder="Enter username"
         onChange={handleChange}
       />
+      {formData.errors.username && (
+        <span style={{ color: "red", fontSize: "0.8em" }}>
+          {formData.errors.username}
+        </span>
+      )}
+
       <input
         type="password"
         name="password"
@@ -57,6 +92,12 @@ const SignupForm = () => {
         onChange={handleChange}
         style={{ marginTop: "5px" }}
       />
+      {formData.errors.password && (
+        <span style={{ color: "red", fontSize: "0.8em" }}>
+          {formData.errors.password}
+        </span>
+      )}
+
       <input
         type="submit"
         value="Submit"
