@@ -1,54 +1,31 @@
 import React, { useState } from "react";
 
-type Errors = {
-  username?: string;
-  password?: string;
-  gender?: string;
-};
-
-type FormData = {
-  username: string;
-  password: string;
-  gender?: string;
-  errors: Errors;
-  loading: boolean;
-};
-
-const submitCredentials = ({ username, password }: FormData) => {
+const submitCredentials = (username: string, password: string) => {
   return new Promise((resolve): void => {
     setTimeout(() => {
       resolve(null);
-      console.log("submitCredentials: ", username, password);
+      console.log("Submitted data: ", username, password);
     }, 500);
   });
 };
 
-const submitExtendedCredentials = ({
-  username,
-  password,
-  gender,
-}: FormData) => {
-  return new Promise((resolve): void => {
-    setTimeout(() => {
-      resolve(null);
-      console.log("submitExtendedCredentials: ", username, password, gender);
-    }, 600);
-  });
+type Errors = {
+  username?: string;
+  password?: string;
 };
 
-const SignupForm = ({
-  initialFormData = {
+const SignupForm = () => {
+  const [formData, setFormData] = useState<{
+    username: string;
+    password: string;
+    errors: Errors;
+    loading: boolean;
+  }>({
     username: "",
     password: "",
     errors: {},
     loading: false,
-  },
-  submit = submitCredentials,
-}: {
-  initialFormData?: FormData;
-  submit?: (data: FormData) => Promise<unknown>;
-}) => {
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  });
 
   const validateForm = () => {
     const errors: Errors = {};
@@ -66,9 +43,7 @@ const SignupForm = ({
     return Object.keys(errors).length === 0;
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     setFormData((prevState) => ({ ...prevState, [name]: value }));
@@ -81,7 +56,7 @@ const SignupForm = ({
 
     setFormData((prevState) => ({ ...prevState, loading: true }));
 
-    submit(formData).then(() => {
+    submitCredentials(formData.username, formData.password).then(() => {
       setFormData((prevState) => ({ ...prevState, loading: false }));
     });
   };
@@ -123,18 +98,6 @@ const SignupForm = ({
         </span>
       )}
 
-      {"gender" in formData && (
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={handleChange}
-          style={{ marginTop: "5px" }}
-        >
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-        </select>
-      )}
-
       <input
         type="submit"
         value="Submit"
@@ -145,25 +108,12 @@ const SignupForm = ({
   );
 };
 
-const initialExtendedSignupFormData = {
-  username: "",
-  password: "",
-  gender: "male",
-  errors: {},
-  loading: false,
-};
-
 function App() {
   return (
     <div
       style={{ display: "flex", flexDirection: "column", maxWidth: "300px" }}
     >
       <SignupForm />
-      <hr />
-      <SignupForm
-        initialFormData={initialExtendedSignupFormData}
-        submit={submitExtendedCredentials}
-      />
     </div>
   );
 }
