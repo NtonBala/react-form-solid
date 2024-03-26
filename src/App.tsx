@@ -9,36 +9,41 @@ const submitCredentials = (username: string, password: string) => {
   });
 };
 
-type Errors = {
+type SignupFormValues = {
+  username: string;
+  password: string;
+};
+
+type SignupFormErrors = {
   username?: string;
   password?: string;
 };
 
-const SignupForm = () => {
-  const [formData, setFormData] = useState<{
-    username: string;
-    password: string;
-    errors: Errors;
-    loading: boolean;
-  }>({
-    username: "",
-    password: "",
-    errors: {},
-    loading: false,
-  });
+type SignupFormState = {
+  values: SignupFormValues;
+  errors: SignupFormErrors;
+  loading: boolean;
+};
+
+type SignupFormProps = {
+  initialState: SignupFormState;
+};
+
+const SignupForm = ({ initialState }: SignupFormProps) => {
+  const [state, setState] = useState(initialState);
 
   const validateForm = () => {
-    const errors: Errors = {};
+    const errors: SignupFormErrors = {};
 
-    if (!formData.username) {
+    if (!state.values.username) {
       errors.username = "Username is required";
     }
 
-    if (!formData.password) {
+    if (!state.values.password) {
       errors.password = "Password is required";
     }
 
-    setFormData((prevState) => ({ ...prevState, errors }));
+    setState((prevState) => ({ ...prevState, errors }));
 
     return Object.keys(errors).length === 0;
   };
@@ -46,7 +51,7 @@ const SignupForm = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
+    setState((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -54,10 +59,10 @@ const SignupForm = () => {
 
     if (!validateForm()) return;
 
-    setFormData((prevState) => ({ ...prevState, loading: true }));
+    setState((prevState) => ({ ...prevState, loading: true }));
 
-    submitCredentials(formData.username, formData.password).then(() => {
-      setFormData((prevState) => ({ ...prevState, loading: false }));
+    submitCredentials(state.values.username, state.values.password).then(() => {
+      setState((prevState) => ({ ...prevState, loading: false }));
     });
   };
 
@@ -74,38 +79,44 @@ const SignupForm = () => {
       <input
         type="text"
         name="username"
-        value={formData.username}
+        value={state.values.username}
         placeholder="Enter username"
         onChange={handleChange}
       />
-      {formData.errors.username && (
+      {state.errors.username && (
         <span style={{ color: "red", fontSize: "0.8em" }}>
-          {formData.errors.username}
+          {state.errors.username}
         </span>
       )}
 
       <input
         type="password"
         name="password"
-        value={formData.password}
+        value={state.values.password}
         placeholder="Enter password"
         onChange={handleChange}
         style={{ marginTop: "5px" }}
       />
-      {formData.errors.password && (
+      {state.errors.password && (
         <span style={{ color: "red", fontSize: "0.8em" }}>
-          {formData.errors.password}
+          {state.errors.password}
         </span>
       )}
 
       <input
         type="submit"
         value="Submit"
-        disabled={formData.loading}
+        disabled={state.loading}
         style={{ marginTop: "5px" }}
       />
     </form>
   );
+};
+
+const initialSignupFormState = {
+  values: { username: "", password: "" },
+  errors: {},
+  loading: false,
 };
 
 function App() {
@@ -113,7 +124,7 @@ function App() {
     <div
       style={{ display: "flex", flexDirection: "column", maxWidth: "300px" }}
     >
-      <SignupForm />
+      <SignupForm initialState={initialSignupFormState} />
     </div>
   );
 }
