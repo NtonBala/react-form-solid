@@ -9,14 +9,28 @@ const submitCredentials = (username: string, password: string) => {
   });
 };
 
+type SignupFormErrors = {
+  username?: string;
+  password?: string;
+};
+
 type SignupFormValues = {
   username: string;
   password: string;
 };
 
-type SignupFormErrors = {
-  username?: string;
-  password?: string;
+const validateSignupForm = (values: SignupFormValues): SignupFormErrors => {
+  const errors: SignupFormErrors = {};
+
+  if (!values.username) {
+    errors.username = "Username is required";
+  }
+
+  if (!values.password) {
+    errors.password = "Password is required";
+  }
+
+  return errors;
 };
 
 type SignupFormState = {
@@ -33,15 +47,7 @@ const SignupForm = ({ initialState }: SignupFormProps) => {
   const [state, setState] = useState(initialState);
 
   const validateForm = () => {
-    const errors: SignupFormErrors = {};
-
-    if (!state.values.username) {
-      errors.username = "Username is required";
-    }
-
-    if (!state.values.password) {
-      errors.password = "Password is required";
-    }
+    const errors = validateSignupForm(state.values);
 
     setState((prevState) => ({ ...prevState, errors }));
 
