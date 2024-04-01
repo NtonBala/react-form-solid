@@ -9,18 +9,15 @@ const submitCredentials = (username: string, password: string) => {
   });
 };
 
-type SignupFormErrors = {
-  username?: string;
-  password?: string;
-};
-
 type SignupFormValues = {
   username: string;
   password: string;
 };
 
-const validateSignupForm = (values: SignupFormValues): SignupFormErrors => {
-  const errors: SignupFormErrors = {};
+const validateSignupForm = (
+  values: SignupFormValues,
+): Partial<SignupFormValues> => {
+  const errors: Partial<SignupFormValues> = {};
 
   if (!values.username) {
     errors.username = "Username is required";
@@ -33,23 +30,45 @@ const validateSignupForm = (values: SignupFormValues): SignupFormErrors => {
   return errors;
 };
 
-type SignupFormState = {
-  values: SignupFormValues;
-  errors: SignupFormErrors;
+type FormState<T> = {
+  values: T;
+  errors: Partial<T>;
   loading: boolean;
 };
 
+const useSignupFormState = function <T>(initialState: FormState<T>) {
+  const [state, setState] = useState(initialState);
+
+  const setValues = (values: Partial<T>) => {
+    setState((prevState) => ({
+      ...prevState,
+      values: { ...prevState.values, ...values },
+    }));
+  };
+
+  const setErrors = (errors: Partial<T>) => {
+    setState((prevState) => ({ ...prevState, errors }));
+  };
+
+  const setLoading = (loading: boolean) => {
+    setState((prevState) => ({ ...prevState, loading }));
+  };
+
+  return { state, setValues, setErrors, setLoading };
+};
+
 type SignupFormProps = {
-  initialState: SignupFormState;
+  initialState: FormState<SignupFormValues>;
 };
 
 const SignupForm = ({ initialState }: SignupFormProps) => {
-  const [state, setState] = useState(initialState);
+  const { state, setValues, setErrors, setLoading } =
+    useSignupFormState(initialState);
 
   const validateForm = () => {
     const errors = validateSignupForm(state.values);
 
-    setState((prevState) => ({ ...prevState, errors }));
+    setErrors(errors);
 
     return Object.keys(errors).length === 0;
   };
@@ -57,7 +76,7 @@ const SignupForm = ({ initialState }: SignupFormProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    setState((prevState) => ({ ...prevState, [name]: value }));
+    setValues({ [name]: value });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -65,10 +84,10 @@ const SignupForm = ({ initialState }: SignupFormProps) => {
 
     if (!validateForm()) return;
 
-    setState((prevState) => ({ ...prevState, loading: true }));
+    setLoading(true);
 
     submitCredentials(state.values.username, state.values.password).then(() => {
-      setState((prevState) => ({ ...prevState, loading: false }));
+      setLoading(false);
     });
   };
 
