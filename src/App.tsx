@@ -57,6 +57,50 @@ const useSignupFormState = function <T>(initialState: FormState<T>) {
   return { state, setValues, setErrors, setLoading };
 };
 
+type TextInputProps = {
+  name: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  placeholder?: string;
+  error?: string;
+};
+
+const TextInput = ({
+  type = "text",
+  name,
+  value,
+  placeholder,
+  onChange,
+  error,
+}: TextInputProps) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+
+    onChange(value);
+  };
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <input
+        type={type}
+        name={name}
+        value={value}
+        placeholder={placeholder || `Enter ${name}`}
+        onChange={handleChange}
+      />
+      {error && (
+        <span style={{ color: "red", fontSize: "0.8em" }}>{error}</span>
+      )}
+    </div>
+  );
+};
+
 type SignupFormProps = {
   initialState: FormState<SignupFormValues>;
 };
@@ -71,12 +115,6 @@ const SignupForm = ({ initialState }: SignupFormProps) => {
     setErrors(errors);
 
     return Object.keys(errors).length === 0;
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    setValues({ [name]: value });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -101,39 +139,26 @@ const SignupForm = ({ initialState }: SignupFormProps) => {
         padding: "5px",
       }}
     >
-      <input
-        type="text"
-        name="username"
-        value={state.values.username}
-        placeholder="Enter username"
-        onChange={handleChange}
-      />
-      {state.errors.username && (
-        <span style={{ color: "red", fontSize: "0.8em" }}>
-          {state.errors.username}
-        </span>
-      )}
+      <div style={{ paddingBottom: "5px" }}>
+        <TextInput
+          name="username"
+          value={state.values.username}
+          onChange={(value: string) => setValues({ username: value })}
+          error={state.errors.username}
+        />
+      </div>
 
-      <input
-        type="password"
-        name="password"
-        value={state.values.password}
-        placeholder="Enter password"
-        onChange={handleChange}
-        style={{ marginTop: "5px" }}
-      />
-      {state.errors.password && (
-        <span style={{ color: "red", fontSize: "0.8em" }}>
-          {state.errors.password}
-        </span>
-      )}
+      <div style={{ paddingBottom: "5px" }}>
+        <TextInput
+          type="password"
+          name="password"
+          value={state.values.password}
+          onChange={(value: string) => setValues({ password: value })}
+          error={state.errors.password}
+        />
+      </div>
 
-      <input
-        type="submit"
-        value="Submit"
-        disabled={state.loading}
-        style={{ marginTop: "5px" }}
-      />
+      <input type="submit" value="Submit" disabled={state.loading} />
     </form>
   );
 };
