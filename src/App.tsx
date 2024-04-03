@@ -101,6 +101,14 @@ const TextInput = ({
   );
 };
 
+type SubmitButtonProps = {
+  loading: boolean;
+};
+
+const SubmitButton = ({ loading }: SubmitButtonProps) => {
+  return <input type="submit" value="Submit" disabled={loading} />;
+};
+
 type SignupFormProps = {
   initialState: FormState<SignupFormValues>;
 };
@@ -158,7 +166,7 @@ const SignupForm = ({ initialState }: SignupFormProps) => {
         />
       </div>
 
-      <input type="submit" value="Submit" disabled={state.loading} />
+      <SubmitButton loading={state.loading} />
     </form>
   );
 };
