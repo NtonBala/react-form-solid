@@ -106,7 +106,16 @@ type SubmitButtonProps = {
 };
 
 const SubmitButton = ({ loading }: SubmitButtonProps) => {
-  return <input type="submit" value="Submit" disabled={loading} />;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <input type="submit" value="Submit" disabled={loading} />
+    </div>
+  );
 };
 
 type SignupFormProps = {
@@ -141,8 +150,6 @@ const SignupForm = ({ initialState }: SignupFormProps) => {
     <form
       onSubmit={handleSubmit}
       style={{
-        display: "flex",
-        flexDirection: "column",
         border: "1px solid black",
         padding: "5px",
       }}
