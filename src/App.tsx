@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 
-const submitCredentials = (username: string, password: string) => {
+type SignupFormValues = {
+  username: string;
+  password: string;
+};
+
+const submitCredentials = ({ username, password }: SignupFormValues) => {
   return new Promise((resolve): void => {
     setTimeout(() => {
       resolve(null);
       console.log("Submitted data: ", username, password);
     }, 500);
   });
-};
-
-type SignupFormValues = {
-  username: string;
-  password: string;
 };
 
 const validateSignupForm = (
@@ -36,7 +36,16 @@ type FormState<T> = {
   loading: boolean;
 };
 
-const useSignupFormState = function <T>(initialState: FormState<T>) {
+type SignupFormStore<T> = {
+  state: FormState<T>;
+  setValues: (values: Partial<T>) => void;
+  setErrors: (errors: Partial<T>) => void;
+  setLoading: (loading: boolean) => void;
+};
+
+const useSignupFormStore = function <T>(
+  initialState: FormState<T>,
+): SignupFormStore<T> {
   const [state, setState] = useState(initialState);
 
   const setValues = (values: Partial<T>) => {
@@ -118,42 +127,12 @@ const SubmitButton = ({ loading }: SubmitButtonProps) => {
   );
 };
 
-type SignupFormProps = {
-  initialState: FormState<SignupFormValues>;
-};
-
-const SignupForm = ({ initialState }: SignupFormProps) => {
-  const { state, setValues, setErrors, setLoading } =
-    useSignupFormState(initialState);
-
-  const validateForm = () => {
-    const errors = validateSignupForm(state.values);
-
-    setErrors(errors);
-
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setLoading(true);
-
-    submitCredentials(state.values.username, state.values.password).then(() => {
-      setLoading(false);
-    });
-  };
-
+const renderSignupFields = function ({
+  state,
+  setValues,
+}: SignupFormStore<SignupFormValues>) {
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        border: "1px solid black",
-        padding: "5px",
-      }}
-    >
+    <>
       <div style={{ paddingBottom: "5px" }}>
         <TextInput
           name="username"
@@ -172,8 +151,70 @@ const SignupForm = ({ initialState }: SignupFormProps) => {
           error={state.errors.password}
         />
       </div>
+    </>
+  );
+};
 
-      <SubmitButton loading={state.loading} />
+const renderSubmitButton = function ({
+  state,
+}: SignupFormStore<SignupFormValues>) {
+  return <SubmitButton loading={state.loading} />;
+};
+
+type SignupFormProps = {
+  initialState: FormState<SignupFormValues>;
+  useFormStore?: typeof useSignupFormStore;
+  validate?: typeof validateSignupForm;
+  submit?: typeof submitCredentials;
+  renderSignupFieldsProp?: (
+    store: SignupFormStore<SignupFormValues>,
+  ) => JSX.Element;
+  renderSubmitButtonProp?: (
+    store: SignupFormStore<SignupFormValues>,
+  ) => JSX.Element;
+};
+
+const SignupForm = ({
+  initialState,
+  useFormStore = useSignupFormStore,
+  validate = validateSignupForm,
+  submit = submitCredentials,
+  renderSignupFieldsProp = renderSignupFields,
+  renderSubmitButtonProp = renderSubmitButton,
+}: SignupFormProps) => {
+  const store = useFormStore(initialState);
+  const { state, setErrors, setLoading } = store;
+
+  const validateForm = () => {
+    const errors = validate(state.values);
+
+    setErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    submit(state.values).then(() => {
+      setLoading(false);
+    });
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      style={{
+        border: "1px solid black",
+        padding: "5px",
+      }}
+    >
+      {renderSignupFieldsProp(store)}
+      {renderSubmitButtonProp(store)}
     </form>
   );
 };
