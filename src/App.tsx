@@ -166,10 +166,8 @@ type SignupFormProps = {
   useFormStore?: typeof useSignupFormStore;
   validate?: typeof validateSignupForm;
   submit?: typeof submitCredentials;
-  renderSignupFieldsProp?: (
-    store: SignupFormStore<SignupFormValues>,
-  ) => JSX.Element;
-  renderSubmitButtonProp?: (
+  renderFormFields?: (store: SignupFormStore<SignupFormValues>) => JSX.Element;
+  renderSubmitButton?: (
     store: SignupFormStore<SignupFormValues>,
   ) => JSX.Element;
 };
@@ -179,8 +177,8 @@ const SignupForm = ({
   useFormStore = useSignupFormStore,
   validate = validateSignupForm,
   submit = submitCredentials,
-  renderSignupFieldsProp = renderSignupFields,
-  renderSubmitButtonProp = renderSubmitButton,
+  renderFormFields = renderSignupFields,
+  renderSubmitButton: renderSubmitButtonProp = renderSubmitButton,
 }: SignupFormProps) => {
   const store = useFormStore(initialState);
   const { state, setErrors, setLoading } = store;
@@ -213,7 +211,7 @@ const SignupForm = ({
         padding: "5px",
       }}
     >
-      {renderSignupFieldsProp(store)}
+      {renderFormFields(store)}
       {renderSubmitButtonProp(store)}
     </form>
   );
