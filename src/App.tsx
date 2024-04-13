@@ -43,10 +43,12 @@ type SignupFormStore<T> = {
   setLoading: (loading: boolean) => void;
 };
 
-const useSignupFormStore = function <T>(
-  initialState: FormState<T>,
-): SignupFormStore<T> {
-  const [state, setState] = useState(initialState);
+const useSignupFormStore = function <T>(initialValues: T): SignupFormStore<T> {
+  const [state, setState] = useState({
+    values: initialValues,
+    errors: {},
+    loading: false,
+  });
 
   const setValues = (values: Partial<T>) => {
     setState((prevState) => ({
@@ -162,7 +164,7 @@ const renderSubmitButton = function ({
 };
 
 type SignupFormProps = {
-  initialState: FormState<SignupFormValues>;
+  initialValues: SignupFormValues;
   useFormStore?: typeof useSignupFormStore;
   validate?: typeof validateSignupForm;
   submit?: typeof submitCredentials;
@@ -173,14 +175,14 @@ type SignupFormProps = {
 };
 
 const SignupForm = ({
-  initialState,
+  initialValues,
   useFormStore = useSignupFormStore,
   validate = validateSignupForm,
   submit = submitCredentials,
   renderFormFields = renderSignupFields,
   renderSubmitButton: renderSubmitButtonProp = renderSubmitButton,
 }: SignupFormProps) => {
-  const store = useFormStore(initialState);
+  const store = useFormStore(initialValues);
   const { state, setErrors, setLoading } = store;
 
   const validateForm = () => {
@@ -217,18 +219,12 @@ const SignupForm = ({
   );
 };
 
-const initialSignupFormState = {
-  values: { username: "", password: "" },
-  errors: {},
-  loading: false,
-};
-
 function App() {
   return (
     <div
       style={{ display: "flex", flexDirection: "column", maxWidth: "300px" }}
     >
-      <SignupForm initialState={initialSignupFormState} />
+      <SignupForm initialValues={{ username: "", password: "" }} />
     </div>
   );
 }
