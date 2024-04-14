@@ -164,7 +164,7 @@ const renderSubmitButton = function ({
 };
 
 type SignupFormProps = {
-  initialValues: SignupFormValues;
+  initialValues?: SignupFormValues;
   useFormStore?: typeof useSignupFormStore;
   validate?: typeof validateSignupForm;
   submit?: typeof submitCredentials;
@@ -175,7 +175,7 @@ type SignupFormProps = {
 };
 
 const SignupForm = ({
-  initialValues,
+  initialValues = { username: "", password: "" },
   useFormStore = useSignupFormStore,
   validate = validateSignupForm,
   submit = submitCredentials,
@@ -224,7 +224,7 @@ function App() {
     <div
       style={{ display: "flex", flexDirection: "column", maxWidth: "300px" }}
     >
-      <SignupForm initialValues={{ username: "", password: "" }} />
+      <SignupForm />
     </div>
   );
 }
