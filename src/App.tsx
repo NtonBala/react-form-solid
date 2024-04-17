@@ -5,12 +5,27 @@ type SignupFormValues = {
   password: string;
 };
 
+type ExtendedSignupFormValues = SignupFormValues & { gender: string };
+
 const submitCredentials = ({ username, password }: SignupFormValues) => {
   return new Promise((resolve): void => {
     setTimeout(() => {
       resolve(null);
-      console.log("Submitted data: ", username, password);
+      console.log("submitCredentials: ", username, password);
     }, 500);
+  });
+};
+
+const submitExtendedCredentials = ({
+  username,
+  password,
+  gender,
+}: ExtendedSignupFormValues) => {
+  return new Promise((resolve): void => {
+    setTimeout(() => {
+      resolve(null);
+      console.log("submitExtendedCredentials: ", username, password, gender);
+    }, 600);
   });
 };
 
@@ -30,20 +45,22 @@ const validateSignupForm = (
   return errors;
 };
 
-type FormState<T> = {
+type FormState<T extends SignupFormValues> = {
   values: T;
   errors: Partial<T>;
   loading: boolean;
 };
 
-type SignupFormStore<T> = {
+type SignupFormStore<T extends SignupFormValues> = {
   state: FormState<T>;
   setValues: (values: Partial<T>) => void;
   setErrors: (errors: Partial<T>) => void;
   setLoading: (loading: boolean) => void;
 };
 
-const useSignupFormStore = function <T>(initialValues: T): SignupFormStore<T> {
+const useSignupFormStore = function <T extends SignupFormValues>(
+  initialValues: T,
+): SignupFormStore<T> {
   const [state, setState] = useState({
     values: initialValues,
     errors: {},
@@ -129,6 +146,33 @@ const SubmitButton = ({ loading }: SubmitButtonProps) => {
   );
 };
 
+type SelectOption = { value: string; label: string };
+
+type SelectProps = {
+  name: string;
+  value: string;
+  options: SelectOption[];
+  onChange: (value: string) => void;
+};
+
+const Select = ({ name, value, options, onChange }: SelectProps) => {
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
+
+    onChange(value);
+  };
+
+  return (
+    <select name={name} value={value} onChange={handleChange}>
+      {options.map(({ value, label }) => (
+        <option key={label} value={value}>
+          {label}
+        </option>
+      ))}
+    </select>
+  );
+};
+
 const renderSignupFields = function ({
   state,
   setValues,
@@ -151,6 +195,46 @@ const renderSignupFields = function ({
           value={state.values.password}
           onChange={(value: string) => setValues({ password: value })}
           error={state.errors.password}
+        />
+      </div>
+    </>
+  );
+};
+
+const renderExtendedSignupFields = function ({
+  state,
+  setValues,
+}: SignupFormStore<ExtendedSignupFormValues>) {
+  return (
+    <>
+      <div style={{ paddingBottom: "5px" }}>
+        <TextInput
+          name="username"
+          value={state.values.username}
+          onChange={(value: string) => setValues({ username: value })}
+          error={state.errors.username}
+        />
+      </div>
+
+      <div style={{ paddingBottom: "5px" }}>
+        <TextInput
+          type="password"
+          name="password"
+          value={state.values.password}
+          onChange={(value: string) => setValues({ password: value })}
+          error={state.errors.password}
+        />
+      </div>
+
+      <div style={{ paddingBottom: "5px" }}>
+        <Select
+          name="gender"
+          value={state.values.gender}
+          options={[
+            { value: "male", label: "Male" },
+            { value: "female", label: "Female" },
+          ]}
+          onChange={(value: string) => setValues({ gender: value })}
         />
       </div>
     </>
