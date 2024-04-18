@@ -29,10 +29,10 @@ const submitExtendedCredentials = ({
   });
 };
 
-const validateSignupForm = (
-  values: SignupFormValues,
-): Partial<SignupFormValues> => {
-  const errors: Partial<SignupFormValues> = {};
+const validateSignupForm = <T extends SignupFormValues>(
+  values: T,
+): Partial<T> => {
+  const errors: Partial<T> = {};
 
   if (!values.username) {
     errors.username = "Username is required";
@@ -67,14 +67,14 @@ const useSignupFormStore = function <T extends SignupFormValues>(
     loading: false,
   });
 
-  const setValues = (values: Partial<T>) => {
+  const setValues = (values: Partial<typeof initialValues>) => {
     setState((prevState) => ({
       ...prevState,
       values: { ...prevState.values, ...values },
     }));
   };
 
-  const setErrors = (errors: Partial<T>) => {
+  const setErrors = (errors: Partial<typeof initialValues>) => {
     setState((prevState) => ({ ...prevState, errors }));
   };
 
@@ -173,17 +173,20 @@ const Select = ({ name, value, options, onChange }: SelectProps) => {
   );
 };
 
-const renderSignupFields = function ({
+const renderSignupFields = <T extends SignupFormValues>({
   state,
   setValues,
-}: SignupFormStore<SignupFormValues>) {
+}: SignupFormStore<T>) => {
   return (
     <>
       <div style={{ paddingBottom: "5px" }}>
         <TextInput
           name="username"
           value={state.values.username}
-          onChange={(value: string) => setValues({ username: value })}
+          onChange={(value: string) => {
+            if ("username" in state.values)
+              setValues({ username: value } as Partial<T>);
+          }}
           error={state.errors.username}
         />
       </div>
@@ -193,7 +196,10 @@ const renderSignupFields = function ({
           type="password"
           name="password"
           value={state.values.password}
-          onChange={(value: string) => setValues({ password: value })}
+          onChange={(value: string) => {
+            if ("username" in state.values)
+              setValues({ username: value } as Partial<T>);
+          }}
           error={state.errors.password}
         />
       </div>
@@ -241,31 +247,29 @@ const renderExtendedSignupFields = function ({
   );
 };
 
-const renderSubmitButton = function ({
+const renderSubmitButton = <T extends SignupFormValues>({
   state,
-}: SignupFormStore<SignupFormValues>) {
+}: SignupFormStore<T>) => {
   return <SubmitButton loading={state.loading} />;
 };
 
-type SignupFormProps = {
-  initialValues?: SignupFormValues;
+type SignupFormProps<T extends SignupFormValues> = {
+  initialValues: T;
   useFormStore?: typeof useSignupFormStore;
-  validate?: typeof validateSignupForm;
+  validate?: (values: T) => Partial<T>;
   submit?: typeof submitCredentials;
-  renderFormFields?: (store: SignupFormStore<SignupFormValues>) => JSX.Element;
-  renderSubmitButton?: (
-    store: SignupFormStore<SignupFormValues>,
-  ) => JSX.Element;
+  renderFormFields?: (store: SignupFormStore<T>) => JSX.Element;
+  renderSubmitButton?: (store: SignupFormStore<T>) => JSX.Element;
 };
 
-const SignupForm = ({
-  initialValues = { username: "", password: "" },
+const SignupForm = <T extends SignupFormValues>({
+  initialValues,
   useFormStore = useSignupFormStore,
   validate = validateSignupForm,
   submit = submitCredentials,
   renderFormFields = renderSignupFields,
   renderSubmitButton: renderSubmitButtonProp = renderSubmitButton,
-}: SignupFormProps) => {
+}: SignupFormProps<T>) => {
   const store = useFormStore(initialValues);
   const { state, setErrors, setLoading } = store;
 
@@ -308,9 +312,61 @@ function App() {
     <div
       style={{ display: "flex", flexDirection: "column", maxWidth: "300px" }}
     >
-      <SignupForm />
+      <SignupForm initialValues={{ username: "", password: "" }} />
     </div>
   );
 }
+
+type SignupFormDumbProps = {
+  submit: () => Promise<unknown>;
+  renderFormFields: () => React.ReactElement;
+  validate?: () => boolean;
+  renderActionButtons?: (isSubmitDisabled: boolean) => React.ReactElement;
+};
+
+const SignupFormDumb = ({
+  validate,
+  submit,
+  renderFormFields,
+  renderActionButtons = (submitting) => <SubmitButton loading={submitting} />,
+}: SignupFormDumbProps) => {
+  const [submitting, setSubmitting] = useState(false);
+  const isSubmitDisabled = validate ? submitting || !validate() : submitting;
+
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
+    e.preventDefault();
+
+    try {
+      setSubmitting(true);
+
+      await submit();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div
+        style={{
+          border: "1px solid black",
+          padding: "5px",
+        }}
+      >
+        <div
+          style={{
+            paddingBottom: "10px",
+          }}
+        >
+          {renderFormFields()}
+        </div>
+
+        <div>{renderActionButtons(isSubmitDisabled)}</div>
+      </div>
+    </form>
+  );
+};
 
 export default App;
