@@ -1,6 +1,6 @@
 # Sign up Form (SOLID React)
 
-This project relates to [react-solid](https://github.com/NtonBala/react-solid) repo and serves as practice in designing reusable React components using _SOLID_ principles. It also may serve as code implementation for [odore-high-level-sign-up-form](https://github.com/NtonBala/odore-high-level-sign-up-form) repo.
+This project relates to [react-solid](https://github.com/NtonBala/react-solid) repo and serves as practice in designing reusable React components using _SOLID_ principles.
 
 The project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
